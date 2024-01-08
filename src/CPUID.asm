@@ -7,7 +7,6 @@ DetectCPUID:
 	pop eax
 
 	mov ecx, eax
-	
 	xor eax, 1 << 21
 
 	push eax
@@ -23,17 +22,21 @@ DetectCPUID:
 	jz NoCPUID
 	ret
 
+NoCPUID:
+	hlt 		; No CPUID Supported
+
 DetectLongMode:
 	mov eax, 0x80000001
 	cpuid
-	test edx, 2 << 29
+	test edx, 1 << 29
 	jz NoLongMode
-	ret ; If this comes back as 0 longmode is not supported :(
+	mov eax, 1	; return true
+	ret 		; If this comes back as 0 longmode is not supported :(
 
 NoLongMode:
-	hlt ; No longmdoe
+	mov eax, 0
+	ret			; return false
+;	hlt 		; No longmdoe
 
-NoCPUID:
-	hlt ; No CPUID Supported
 
 ; Important: We need to enable Paging for LongMode. Paging is where we have to copy all physical memory to match the virtual memory.

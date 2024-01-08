@@ -1,3 +1,5 @@
 *.bin 
 *.flp 
 log 
+*.obj 
+*.exe 

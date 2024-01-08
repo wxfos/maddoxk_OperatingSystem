@@ -1,9 +1,21 @@
 megs: 4
-cpu: ips=1000000
+#cpu: model=corei7 ips=40000000
+#clock: sync=both
 log: log
 
-romimage: file=$BXSHARE/BIOS-bochs-latest,address=Oxf0000
+#cpu: model=corei7_haswell_4770	#bochs 2.7 not support
+cpu: model=corei7_sandy_bridge_2600k, count=1:1:1, ips=50000000, reset_on_triple_fault=1, ignore_bad_msrs=1, msrs="msrs.def"
+cpu: cpuid_limit_winnt=0
+
+#avx_f16c=1, avx_fma=1, bmi=bmi2	# not support
+cpuid: x86_64=1, mmx=1, level=6, sep=1, simd=sse4_2, apic=xapic, aes=1, movbe=1, xsave=1, apic=x2apic, sha=1, adx=1, xsaveopt=1, 1g_pages=1, pcid=1, fsgsbase=1, smep=1, smap=1, mwait=1, vmx=1
+cpuid: family=6, model=0x1a, stepping=5, vendor_string="GenuineIntel", brand_string="Intel(R) Core(TM) i7-4770 CPU (sandy)"
+
+
+romimage: file=$BXSHARE/BIOS-bochs-latest, address=Oxf0000
 vgaromimage: file=$BXSHARE/VGABIOS-elpin-2.40
+#vgaromimage: file=$BXSHARE/VGABIOS-lgpl-latest
+#vga: extension=vbe, update_freq=15
 
 floppya: 1_44=bootloader.flp,status=inserted
 # hard disk
@@ -11,6 +23,7 @@ floppya: 1_44=bootloader.flp,status=inserted
 #ata0-master: type=disk, path="hd10meg.img", cylinders=306, heads=4, spt=17
 
 boot: floppy
-mouse: enabled=0  
+keyboard: type=mf, serial_delay=250, paste_delay=100000, user_shortcut=none
+mouse: enabled=0, type=ps2, toggle=ctrl+mbutton
    
 #keyboard:keymap=$BXSHARE/keymaps/x11-pc-us.map
