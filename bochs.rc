@@ -1,0 +1,16 @@
+megs: 4
+cpu: ips=1000000
+log: log
+
+romimage: file=$BXSHARE/BIOS-bochs-latest,address=Oxf0000
+vgaromimage: file=$BXSHARE/VGABIOS-elpin-2.40
+
+floppya: 1_44=bootloader.flp,status=inserted
+# hard disk
+#ata0: enabled=1, ioaddr1=0x1f0, ioaddr2=0x3f0, irq=14
+#ata0-master: type=disk, path="hd10meg.img", cylinders=306, heads=4, spt=17
+
+boot: floppy
+mouse: enabled=0  
+   
+#keyboard:keymap=$BXSHARE/keymaps/x11-pc-us.map

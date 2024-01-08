@@ -53,6 +53,7 @@ StartProtectedMode:
 	mov [0xb8010], byte 'r'
 	mov [0xb8012], byte 'l'
 	mov [0xb8014], byte 'd'
+	mov [0xb8014], byte ' '
 
 	call DetectCPUID
 	call DetectLongMode
@@ -66,7 +67,7 @@ Start64Bit:
 	mov edi, 0xb8000
 	mov rax, 0x1f201f201f201f20
 	mov ecx, 500
-	rep stosq
+	rep stosq	;write rax to [edi]
 	jmp $
 
 
