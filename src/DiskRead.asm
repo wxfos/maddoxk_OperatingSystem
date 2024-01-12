@@ -8,7 +8,7 @@ ReadDisk:
 	mov ah, 0x02
 	mov bx, PROGRAM_SPACE
 	; Reminder: load more sectors as program gets bigger.
-	mov al, 4
+	mov al, 8	; 8*512=4k
 	; Tell BIOs what drive we want to read from (cyl 0 and header 0)
 	mov dl, [BOOT_DISK]
 	mov ch, 0x00

@@ -49,8 +49,8 @@ boot: floppy
 floppy_bootsig_check: disabled=0
 
 #log: /dev/null
-log: bochsout.txt
-logprefix: %t%e%d
+#log: bochsout.txt
+#logprefix: %t%e%d
 
 panic: action=ask
 error: action=report
