@@ -1,5 +1,4 @@
 megs: 512
-#cpu: model=corei7 ips=40000000
 #log: log
 
 #cpu: model=corei7_haswell_4770	#bochs 2.7 not support
@@ -21,12 +20,13 @@ floppya: 1_44=bootloader.flp,status=inserted
 # hard disk
 #ata0: enabled=1, ioaddr1=0x1f0, ioaddr2=0x3f0, irq=14
 #ata0-master: type=disk, path="hd10meg.img", cylinders=306, heads=4, spt=17
+#ata0-master: type=disk, path="hda.img", mode=flat, cylinders=20, heads=16, spt=63
+#ata0-slave: type=disk, path="hdb.img", mode=flat, cylinders=20, heads=16, spt=63
 
 boot: floppy
 keyboard: type=mf, serial_delay=250, paste_delay=100000, user_shortcut=none
 mouse: enabled=1, type=ps2, toggle=ctrl+alt
    
 #keyboard:keymap=$BXSHARE/keymaps/x11-pc-us.map
-#ata0: enabled=1, ioaddr1=0x1f0, ioaddr2=0x3f0, irq=14
-#ata0-master: type=disk, path="hda.img", mode=flat, cylinders=20, heads=16, spt=63
-#ata0-slave: type=disk, path="hdb.img", mode=flat, cylinders=20, heads=16, spt=63
+
+display_library: sdl2
