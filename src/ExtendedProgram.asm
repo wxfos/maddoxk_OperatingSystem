@@ -12,7 +12,8 @@ cleanLine2Real:			; clean one line in real mode, we can use 32bit registers in r
 	mov di, 0x0000
 	mov eax, 0x2f202f20
 	mov ecx, 80
-	rep stosd
+;	rep stosw			; write ax * 80 
+	rep stosd			; write eax * 80
 	ret
 	
 EnterProtectedMode:
@@ -21,8 +22,8 @@ EnterProtectedMode:
 	call EnableA20
 	cli
 	; Loads gdt and bits so we can get protected mode!!! >:D
-	;lgdt [gdt_descriptor]
-	lgdt [gdt_desc]	
+	lgdt [gdt_descriptor]	;exception
+	;lgdt [gdt_desc]		;wxf, ok
 
 	mov eax, cr0
 	or eax, 1
@@ -63,12 +64,12 @@ StartProtectedMode:
 	mov fs, ax
 	mov gs, ax
 	call cleanLine2Pro
-	call setup_idt
-	sti
+	;jmp $
+	;call setup_idt
+	;sti
 	;hlt
-	jmp $
 	
-	;lidt [idt_descriptor]
+	;lidt [idt_descriptor]	;wxf
 	;lgdt [gdt_descriptor]
 	;lgdt [gdt_desc]
 

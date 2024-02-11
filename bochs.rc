@@ -12,8 +12,8 @@ cpuid: family=6, model=0x1a, stepping=5, vendor_string="GenuineIntel", brand_str
 
 
 romimage: file=$BXSHARE/BIOS-bochs-latest, address=Oxf0000
-vgaromimage: file=$BXSHARE/VGABIOS-elpin-2.40
-#vgaromimage: file=$BXSHARE/VGABIOS-lgpl-latest
+#vgaromimage: file=$BXSHARE/VGABIOS-elpin-2.40
+vgaromimage: file=$BXSHARE/VGABIOS-lgpl-latest
 #vga: extension=vbe, update_freq=15
 
 floppya: 1_44=bootloader.flp,status=inserted

@@ -33,7 +33,28 @@ mov bp, 0x7c00
 mov sp, bp
 mov bx, BootSuccessString
 call PrintString
+;added by wxf
+jmp nn
+mov ax, 0xba00
+;mov es, ax
+;mov ds, ax
+mov ax, 0x4f02	; GET SuperVGA MODE INFORMATION
+mov bx, 0x118	; 1024x768x16M
+int 0x10
+mov ax, 0x4f01	; GET SuperVGA MODE INFORMATION
+mov cx, 0x118	; 1024x768x16M
+mov di, 0xba00		; es:di
+int 0x10
+jmp $
 
+;add di, 0x28
+;mov ebx, [ds:di]	; physical address of linear video buffer
+;mov ax, 0xb800
+;mov es, ax
+;hlt
+;jmp $
+;
+nn:
 call ReadDisk
 
 ; Bootloader Jumps back to its self to run

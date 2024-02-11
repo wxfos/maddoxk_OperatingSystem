@@ -20,7 +20,7 @@ gdt_codedesc:
 					; This is the Access Byte! : 1, Valid Memory, Kernal Privledge (0-3), 
 					; System segments, Executable bit (1=code 0=data),DC privledge, Read or Write bit (1=read 0=write),
 					; Access bit (we should set this to 0 and the cpu will change to 1 when its accessed), b = declared at byte
-	db 0xaf			; 11001111b Granularity(0=1 byte blocks, 1=4kb blocks), Size bit(0=16bit, 1=32bit),0,0, Limit (1111=biggest)
+	db 0xcf			; 11001111b Granularity(0=1 byte blocks, 1=4kb blocks), Size bit(0=16bit, 1=32bit),0,0, Limit (1111=biggest)
 	db 0x00			; Base base (yes, the base's base)
 	
 gdt_datadesc:		; Everythings the same for the Data Descriptor
@@ -28,7 +28,7 @@ gdt_datadesc:		; Everythings the same for the Data Descriptor
 	dw 0x0000
 	db 0x00
 	db 0x92			; 10010010b, but the Access Bytes 'Executable bit' is 0 because this is data not code
-	db 0xaf			; 11001111b
+	db 0xcf			; 11001111b
 	db 0x00
 
 gdt_end:
