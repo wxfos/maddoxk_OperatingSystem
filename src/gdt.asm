@@ -7,6 +7,7 @@
 ; Offset = Memory Address of the GDT.
 ; In this GBT, we need a null descriptor. This is just a value in memory that is a 0. This is very important for certain functions.
 ; This GBT also contains a Data segment and a Code segment.
+align 16
 
 gdt_nulldesc:
 	dd 0
@@ -47,9 +48,9 @@ dataseg equ gdt_datadesc - gdt_nulldesc		; 0x10
 idt_desc:
     dw 256 * 8 - 1
     dq idt
-    
+
 idt:
-    times 256 dd 0
+    times 256 dq 0
 
 align 4
 gdt_desc:
@@ -84,20 +85,43 @@ EditGDT: ; This function edits our GDT to 64-bits. Very nice.
 	mov [gdt_datadesc + 6], byte 0xaf	;10101111b
 	ret
 
+;struct IDT_entry {
+;    uint16 offset_lowerbits;
+;    uint16 selector;
+;    uint8 zero;
+;    uint8 type_attr;
+;    uint16 offset_higherbits;
+;};
+;void idt_set(int idt_no, void* handler){
+;	uint32 handler_addr = (uint32)handler;
+;	IDT[idt_no].offset_lowerbits = handler_addr & 0xffff;
+;	IDT[idt_no].selector = KERNEL_CODE_SEGMENT_OFFSET;
+;	IDT[idt_no].zero = 0;
+;	IDT[idt_no].type_attr = INTERRUPT_GATE;
+;	IDT[idt_no].offset_higherbits = (handler_addr & 0xffff0000) >> 16;
+;}
 setup_idt:	;32
-    lea edx, [ignore_int]
-    mov eax, 0x00080000
-    mov dx, ax
-    mov word [idt], dx
-    mov word [idt + 6], 0x8E00
+;    lea edx, [ignore_int]
+;    mov eax, 0x00080000
+;    mov dx, ax
+;    mov word [idt], dx
+;    mov word [idt + 6], 0x8E00  ;INTERRUPT_GATE
 
     lea edi, [idt]
     mov ecx, 256
+    lea eax, [ignore_int]
+    mov edx, eax
+    and eax, 0xffff
+    mov ebx, 0x00080000
+    or eax, ebx
+    mov dh, 0x8e
+    mov dl, 0
 rp_sidt:
     mov [edi], eax
     mov [edi + 4], edx
     add edi, 8
     loop rp_sidt
+;    jmp $
     lidt [idt_desc]
     ret
     

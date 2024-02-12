@@ -65,9 +65,11 @@ StartProtectedMode:
 	mov gs, ax
 	call cleanLine2Pro
 	;jmp $
-	;call setup_idt
-	;sti
-	;hlt
+	call setup_idt
+	sti					;idt is wrong, exception will occur
+;	cli
+.loop	hlt
+	jmp .loop
 	
 	;lidt [idt_descriptor]	;wxf
 	;lgdt [gdt_descriptor]
@@ -86,7 +88,7 @@ StartProtectedMode:
 	rep stosd			; write eax to es:[edi]
 	
 	cld
-	mov edi, 0xb8000
+	mov edi, 0xb8000	; print hello
 	mov esi, hello
 	mov ecx, 24
 	rep movsb
@@ -106,7 +108,7 @@ hello64:
 
 Start64Bit:
 	cld
-	mov rdi, 0xb80a0
+	mov rdi, 0xb80a0	;print hello 64
 	mov rsi, hello64
 	mov rcx, 24
 	rep movsb			; copy [rsi] to [rdi]
@@ -119,7 +121,8 @@ Start64Bit:
     mov ax, 1
 	mov bx, 1
     call set_cursor
-	jmp $
+.h	hlt
+	jmp .h
 
 
 set_cursor:
