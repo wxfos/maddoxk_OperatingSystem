@@ -9,10 +9,9 @@
 ; This GBT also contains a Data segment and a Code segment.
 align 16
 
-gdt_nulldesc:
+gdt_nulldesc:       ; 64bit
 	dd 0
 	dd 0
-
 gdt_codedesc:
 	dw 0xFFFF		; THE LIMIT OF MEMORY WE ARE USING (0xFFFF is all of it)
 	dw 0x0000		; THE BASE OF MEMORY WE ARE USING (0x0000 is the very bottom)
@@ -22,8 +21,7 @@ gdt_codedesc:
 					; System segments, Executable bit (1=code 0=data),DC privledge, Read or Write bit (1=read 0=write),
 					; Access bit (we should set this to 0 and the cpu will change to 1 when its accessed), b = declared at byte
 	db 0xcf			; 11001111b Granularity(0=1 byte blocks, 1=4kb blocks), Size bit(0=16bit, 1=32bit),0,0, Limit (1111=biggest)
-	db 0x00			; Base base (yes, the base's base)
-	
+	db 0x00			; Base base (yes, the base's base)	
 gdt_datadesc:		; Everythings the same for the Data Descriptor
 	dw 0xFFFF
 	dw 0x0000
@@ -31,13 +29,11 @@ gdt_datadesc:		; Everythings the same for the Data Descriptor
 	db 0x92			; 10010010b, but the Access Bytes 'Executable bit' is 0 because this is data not code
 	db 0xcf			; 11001111b
 	db 0x00
-
 gdt_end:
 
 gdt_descriptor:		; This is what we are actually passing to the cpu
-	gdt_size:
-		dw gdt_end - gdt_nulldesc - 1 
-		dq gdt_nulldesc		; dq for 64 bit
+    dw gdt_end - gdt_nulldesc - 1 ; 	gdt_size:
+    dq gdt_nulldesc		; dq for 64 bit
 
 ; Codedescriptor Address
 codeseg equ gdt_codedesc - gdt_nulldesc		; 0x8
@@ -45,12 +41,19 @@ dataseg equ gdt_datadesc - gdt_nulldesc		; 0x10
 
 ;idt_descriptor:
 ;	times 2048 db 0
-idt_desc:
+idt_desc:   ; idt32
     dw 256 * 8 - 1
     dq idt
-
 idt:
     times 256 dq 0
+
+idt64_desc: 								; Interrupt Descriptor Table Register
+	dw 256*16-1								; limit of IDT (size minus one) (4096 bytes - 1)
+    ; dq idt64
+	dq 0x0000000000000000					; linear address of IDT
+idt64:
+    times 256 dq 0
+
 
 align 4
 gdt_desc:
@@ -116,25 +119,132 @@ setup_idt:	;32
     or eax, ebx
     mov dh, 0x8e
     mov dl, 0
-rp_sidt:
+.rp_sidt:
     mov [edi], eax
     mov [edi + 4], edx
     add edi, 8
-    loop rp_sidt
+    loop .rp_sidt
 ;    jmp $
     lidt [idt_desc]
     ret
-    
+
+
 ignore_int:
 	cli
 	cld
 	mov edi, 0xb8000 + 160*4
+    push edi
 	mov eax, 0x3f203f20
 	mov ecx, 80
 	rep stosd			; write eax to [edi]
+    pop edi
+    mov al, [count]
+    inc al
+    mov [count], al
+    mov [edi], al
 
-    hlt
-    jmp short ignore_int
+;    hlt
+;    jmp short ignore_int
+    sti
     iret
-    
+count:
+    db '0'
+
+[bits 64]
+ignore_int64:
+	cli
+	cld
+	mov rdi, 0xb8000 + 160*4
+    push rdi
+	mov rax, 0x3f203f20
+	mov rcx, 80
+	rep stosd			; write eax to [edi]
+    pop rdi
+    mov al, [count]
+    inc al
+    mov [count], al
+    mov [rdi], al
+;    hlt
+;    jmp short ignore_int
+    sti
+    iretq
+
+setup_idt64:
+; Build a temporary IDT
+	xor edi, edi 			; create the 64-bit IDT (at linear address 0x0000000000000000)
+	mov rcx, 32
+make_exception_gates: 			; make gates for exception handlers
+	mov rax, ignore_int64 ; exception_gate
+	push rax			; save the exception gate to the stack for later use
+	stosw				; store the low word (15:0) of the address
+	mov ax, codeseg     ; SYS64_CODE_SEL
+	stosw				; store the segment selector
+	mov ax, 0x8E00
+	stosw				; store exception gate marker
+	pop rax				; get the exception gate back
+	shr rax, 16
+	stosw				; store the high word (31:16) of the address
+	shr rax, 16
+	stosd				; store the extra high dword (63:32) of the address.
+	xor rax, rax
+	stosd				; reserved
+	dec rcx
+	jnz make_exception_gates
+
+	mov rcx, 256-32
+make_interrupt_gates: 			; make gates for the other interrupts
+	mov rax, ignore_int64 ; interrupt_gate
+	push rax			; save the interrupt gate to the stack for later use
+	stosw				; store the low word (15:0) of the address
+	mov ax, codeseg     ; SYS64_CODE_SEL
+	stosw				; store the segment selector
+	mov ax, 0x8F00
+	stosw				; store interrupt gate marker
+	pop rax				; get the interrupt gate back
+	shr rax, 16
+	stosw				; store the high word (31:16) of the address
+	shr rax, 16
+	stosd				; store the extra high dword (63:32) of the address.
+	xor eax, eax
+	stosd				; reserved
+	dec rcx
+	jnz make_interrupt_gates
+
+	; Set up the exception gates for all of the CPU exceptions
+	; The following code will be seriously busted if the exception gates are moved above 16MB
+	; mov word [0x00*16], exception_gate_00
+	; mov word [0x01*16], exception_gate_01
+	; mov word [0x02*16], exception_gate_02
+	; mov word [0x03*16], exception_gate_03
+	; mov word [0x04*16], exception_gate_04
+	; mov word [0x05*16], exception_gate_05
+	; mov word [0x06*16], exception_gate_06
+	; mov word [0x07*16], exception_gate_07
+	; mov word [0x08*16], exception_gate_08
+	; mov word [0x09*16], exception_gate_09
+	; mov word [0x0A*16], exception_gate_10
+	; mov word [0x0B*16], exception_gate_11
+	; mov word [0x0C*16], exception_gate_12
+	; mov word [0x0D*16], exception_gate_13
+	; mov word [0x0E*16], exception_gate_14
+	; mov word [0x0F*16], exception_gate_15
+	; mov word [0x10*16], exception_gate_16
+	; mov word [0x11*16], exception_gate_17
+	; mov word [0x12*16], exception_gate_18
+	; mov word [0x13*16], exception_gate_19
+
+	; mov edi, 0x21			; Set up Keyboard handler
+	; mov eax, keyboard
+	; call create_gate
+	; mov edi, 0x22			; Set up Cascade handler
+	; mov eax, cascade
+	; call create_gate
+	; mov edi, 0x28			; Set up RTC handler
+	; mov eax, rtc
+	; call create_gate
+
+	lidt [idt64_desc]			; load IDT register
+
+    ret
+
 [bits 16]

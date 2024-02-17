@@ -1,5 +1,6 @@
-*.bin 
-*.flp 
-log 
-*.obj 
-*.exe 
+*.bin
+*.flp
+log
+*.obj
+*.exe
+.DS_Store

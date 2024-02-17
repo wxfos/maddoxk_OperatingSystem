@@ -65,11 +65,12 @@ StartProtectedMode:
 	mov gs, ax
 	call cleanLine2Pro
 	;jmp $
-	call setup_idt
-	sti					;idt is wrong, exception will occur
+;	call setup_idt
+;	sti					;idt is wrong, exception will occur
 ;	cli
-.loop	hlt
-	jmp .loop
+.loop nop
+;	hlt
+;	jmp .loop
 	
 	;lidt [idt_descriptor]	;wxf
 	;lgdt [gdt_descriptor]
@@ -95,9 +96,8 @@ StartProtectedMode:
 
 	call DetectCPUID
 	call DetectLongMode
-	call SetUpIdentityPaging
+	call SetUpIdentityPaging	; must enable pageing before switch to 64bit, but it'll cause idt32 exception
 	call EditGDT
-
 	jmp codeseg:Start64Bit
 
 ; Hello 64bit!
@@ -116,13 +116,16 @@ Start64Bit:
     mov ax, 2			; row
 	mov bx, 13			; col
     call set_cursor
-    ;sti
+	call setup_idt64
+    sti
+	; hlt
+    ; mov ax, 1
+	; mov bx, 1
+    ; call set_cursor
+.loop:
+	nop
 	hlt
-    mov ax, 1
-	mov bx, 1
-    call set_cursor
-.h	hlt
-	jmp .h
+	jmp .loop
 
 
 set_cursor:

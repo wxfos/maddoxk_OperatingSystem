@@ -8,7 +8,7 @@ ReadDisk:
 	mov ah, 0x02
 	mov bx, PROGRAM_SPACE
 	; Reminder: load more sectors as program gets bigger.
-	mov al, 8	; 8*512=4k
+	mov al, 16	; 64*512=32k
 	; Tell BIOs what drive we want to read from (cyl 0 and header 0)
 	mov dl, [BOOT_DISK]
 	mov ch, 0x00
@@ -17,21 +17,17 @@ ReadDisk:
 
 	; int 0x13 is an interupt
 	int 0x13
-
 	jc DiskReadFailed
-
 	ret
+DiskReadFailed:
+	mov bx, DiskReadErrorString
+	call PrintString
+	jmp $
 
 ; Declare Boot Disk Var
 BOOT_DISK:
 	db 0
-
 ; ReadFail Fallback
 DiskReadErrorString:
-	db 'Disk Read has Failed',0
+	db 'Disk read failed!',0
 
-DiskReadFailed:
-	mov bx, DiskReadErrorString
-	call PrintString
-
-	jmp $

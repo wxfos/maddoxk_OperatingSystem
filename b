@@ -3,3 +3,4 @@ nasm -Isrc src/ExtendedProgram.asm -o ExtendedProgram.bin
 cat bootloader.bin ExtendedProgram.bin > bootloader.flp 
 
 #alias ob='i386-elf-objdump -D -b binary -m i386:x86-64'
+bochs -q -f bochs.rc 
