@@ -86,7 +86,7 @@ StartProtectedMode:
 	mov edi, 0xb8000
 	mov eax, 0x1f201f20
 	mov ecx, 80*25/2
-	rep stosd			; write eax to es:[edi]
+	; rep stosd			; write eax to es:[edi]
 	
 	cld
 	mov edi, 0xb8000	; print hello
@@ -117,7 +117,8 @@ Start64Bit:
 	mov bx, 13			; col
     call set_cursor
 	call setup_idt64
-    sti
+	call init_pic
+    ; sti
 	; hlt
     ; mov ax, 1
 	; mov bx, 1
