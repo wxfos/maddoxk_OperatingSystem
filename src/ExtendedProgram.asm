@@ -107,6 +107,7 @@ hello64:
 [bits 64]
 
 Start64Bit:
+	xchg bx, bx			;Magic breakpoint
 	cld
 	mov rdi, 0xb80a0	;print hello 64
 	mov rsi, hello64
@@ -123,7 +124,7 @@ Start64Bit:
     ; mov ax, 1
 	; mov bx, 1
     ; call set_cursor
-.loop:
+.loop:					; 0x964d
 	nop
 	hlt
 	jmp .loop

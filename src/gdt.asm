@@ -215,7 +215,7 @@ make_interrupt_gates: 			; make gates for the other interrupts
 	stosw				; store the low word (15:0) of the address
 	mov ax, codeseg     ; SYS64_CODE_SEL
 	stosw				; store the segment selector
-	mov ax, 0x8F00
+	mov ax, 0x8e00
 	stosw				; store interrupt gate marker
 	pop rax				; get the interrupt gate back
 	shr rax, 16
@@ -250,14 +250,14 @@ make_interrupt_gates: 			; make gates for the other interrupts
 	mov word [0x12*16], exception_gate_18
 	mov word [0x13*16], exception_gate_19
 
-	mov edi, 0x21			; Set up Keyboard handler
-	mov eax, keyboard
+	mov rdi, 0x21			; Set up Keyboard handler
+	mov rax, keyboard
 	call create_gate
-	mov edi, 0x22			; Set up Cascade handler
-	mov eax, cascade
+	mov rdi, 0x22			; Set up Cascade handler
+	mov rax, cascade
 	call create_gate
-	mov edi, 0x28			; Set up RTC handler
-	mov eax, rtc
+	mov rdi, 0x28			; Set up RTC handler
+	mov rax, rtc
 	call create_gate
 
 	lidt [idt64_desc]			; load IDT register
@@ -390,7 +390,7 @@ exception_gate_08:
 	mov al, 0x08
 	jmp exception_gate_main
 
-exception_gate_09:
+exception_gate_09:	;0x9346
 	mov al, 0x09
 	jmp exception_gate_main
 
@@ -434,7 +434,8 @@ exception_gate_19:
 	mov al, 0x13
 	jmp exception_gate_main
 
-exception_gate_main:
+exception_gate_main: ;0x9372
+	pushf
 	cld
 	mov rdi, 0xb8000 + 160*8
     push rdi
@@ -447,10 +448,19 @@ exception_gate_main:
     ; mov rax, qword [os_Counter_RTC]
     add al, 0x30
     mov [rdi], al
-exception_gate_main_hang:
+    add qword [e_count],1
+	mov al, byte [e_count]
+    add al, 0x30
+	add rdi, 4
+    mov [rdi], al
+	  
+exception_gate_main_hang:	;0x93a4
 	nop
+	sti
+	popf
     iretq
 	; jmp exception_gate_main_hang	; Hang. User must reset machine at this point
+e_count: dq 0
 ; -----------------------------------------------------------------------------
 
 
@@ -458,7 +468,7 @@ exception_gate_main_hang:
 ; create_gate
 ; rax = address of handler
 ; rdi = gate # to configure
-create_gate:
+create_gate:	;0x93b0
 	push rdi
 	push rax
 

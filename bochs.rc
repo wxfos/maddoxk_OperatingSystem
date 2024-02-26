@@ -2,7 +2,7 @@ megs: 512
 #log: log
 
 #cpu: model=corei7_haswell_4770	#bochs 2.7 not support
-cpu: model=corei7_sandy_bridge_2600k, count=1:1:1, ips=50000000, reset_on_triple_fault=1, ignore_bad_msrs=1, msrs="msrs.def"
+cpu: model=corei7_sandy_bridge_2600k, count=1:1:1, ips=50000000, reset_on_triple_fault=0, ignore_bad_msrs=1, msrs="msrs.def"
 cpu: cpuid_limit_winnt=0
 clock: sync=both
 
@@ -16,7 +16,7 @@ romimage: file=$BXSHARE/BIOS-bochs-latest, address=Oxf0000
 vgaromimage: file=$BXSHARE/VGABIOS-lgpl-latest
 #vga: extension=vbe, update_freq=15
 
-floppya: 1_44=bootloader.flp,status=inserted
+floppya: 1_44=build/bootloader.flp,status=inserted
 # hard disk
 #ata0: enabled=1, ioaddr1=0x1f0, ioaddr2=0x3f0, irq=14
 #ata0-master: type=disk, path="hd10meg.img", cylinders=306, heads=4, spt=17
@@ -24,9 +24,12 @@ floppya: 1_44=bootloader.flp,status=inserted
 #ata0-slave: type=disk, path="hdb.img", mode=flat, cylinders=20, heads=16, spt=63
 
 boot: floppy
-keyboard: type=mf, serial_delay=250, paste_delay=100000, user_shortcut=none
 mouse: enabled=1, type=ps2, toggle=ctrl+alt
-   
+keyboard: type=mf, serial_delay=250, paste_delay=100000, user_shortcut=none
 #keyboard:keymap=$BXSHARE/keymaps/x11-pc-us.map
+keyboard:keymap=$BXSHARE/keymaps/sdl2-pc-us.map
 
 display_library: sdl2
+
+magic_break: enabled=1	# magic breakpoint code:	xchg bx, bx
+

@@ -1,3 +1,2 @@
-nasm -fbin boot.asm -o boot
-:qemu-system-x86_64 -hda boot
-call qe -hda boot
+nasm -fbin boot.asm -o boot.bin
+qemu-system-x86_64 -hda boot.bin
